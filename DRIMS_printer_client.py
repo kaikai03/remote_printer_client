@@ -8,6 +8,11 @@ import configparser
 import re
 import logger
 
+__version__ = '210819'
+__config_version__ = '210819'
+__chrome_version__ = '92.0.4515.159'
+
+
 __base_flag__ = '#//'
 __ping_flag__ = 'ping#//'
 
@@ -139,11 +144,15 @@ def on_error(ws, error):
 
     if type(error) == ConnectionRefusedError or \
             type(error) == ws_error_flag or \
-            type(error) == ConnectionResetError:
+            type(error) == ConnectionResetError or \
+            type(error) == TimeoutError or \
+            type(error) == ConnectionAbortedError or \
+            type(error) == ConnectionError or \
+            type(error) == BrokenPipeError:
         print('正在尝试第%d次重连' % reconnect_count)
         reconnect_count += 1
         if reconnect_count < 65535:
-            if reconnect_count<5:
+            if reconnect_count < 5:
                 time.sleep(2)
             else:
                 time.sleep(10)
@@ -197,5 +206,10 @@ if __name__ == "__main__":
         raise Exception('启动失败')
 
     load_configur()
+
+    print('本体版本：', __version__)
+    print('配置版本：', __config_version__)
+    print('chrome最优版本：', __chrome_version__)
+
     ws_connection(server_host)
 
