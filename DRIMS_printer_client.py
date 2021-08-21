@@ -8,7 +8,7 @@ import configparser
 import re
 import logger
 
-__version__ = '210819'
+__version__ = '210820'
 __config_version__ = '210819'
 __chrome_version__ = '92.0.4515.159'
 
