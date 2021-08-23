@@ -7,8 +7,10 @@ import printer
 import configparser
 import re
 import logger
+import json
+import monitor
 
-__version__ = '210820'
+__version__ = '210823'
 __config_version__ = '210819'
 __chrome_version__ = '92.0.4515.159'
 
@@ -18,9 +20,16 @@ __ping_flag__ = 'ping#//'
 
 __print_flag__ = 'printOrder#//'
 
+__info_flag__ = 'infoOrder#//'
+__info_pc__ = 'pcinfo'
+__info_report__ = 'report'
+
+
 __return_flag__ = 'return#//'
 __print_success_base__ = (__return_flag__ + 'PrintSuccess_%s')
 __print_error_base__ = (__return_flag__ + 'PrintError_%s')
+__print_info_pc_base__ = (__return_flag__ + 'infoOrder_{"pcinfo":%s}')
+__print_info_report_base__ = (__return_flag__ + 'infoOrder_{"report":%s}')
 __pong_base__ = __return_flag__ + 'Pong_%s'
 
 __ban_flag__ = 'fuckoff#//'
@@ -49,6 +58,7 @@ printer_name = None
 hospital_id = None
 hospital_name = None
 
+m = monitor.Monitor()
 
 def flag_clean(msg):
     return msg.split(__base_flag__)[1]
@@ -131,6 +141,14 @@ def on_message(ws, msg):
         print(flag_clean(msg))
         banned = True
 
+    if __info_flag__ in msg:
+        order = flag_clean(msg)
+        if order == __info_pc__:
+            ws.send(__print_info_pc_base__ % json.dumps(m.get_base_info()))
+        elif order == __info_report__:
+            ws.send(__print_info_report_base__ % json.dumps(m.get_report()))
+        else:
+            print('unknown order:', order)
 
 def on_error(ws, error):
     print(error)

@@ -1,12 +1,13 @@
 # coding: utf-8
+__author__ = 'kk'
 
 import psutil
 import time
 # import pynvml
 import platform
 # from publisher import Publisher
-import json
-import threading
+# import json
+# import threading
 
 # 最终间隔还需要加上大约3秒的时间（cpu统计和网络统计耗时等）
 __publish_report_interval_default__ = 3
@@ -126,6 +127,7 @@ class Monitor:
     #         print(e)
 
     def get_report(self):
+        # 未启用线程时，禁止频繁调用
         return {'cpu': self.get_cpu_used(),
                 'memory': self.get_memory_used(),
                 'disk_used': self.get_disk_used(device_all=False),
@@ -180,3 +182,6 @@ class Monitor:
 # m.publish.publish_long("111")
 #
 # m.publish_timer.is_alive()
+
+# json.dumps(m.get_base_info())
+# m.get_report()
