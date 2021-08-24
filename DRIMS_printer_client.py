@@ -3,14 +3,15 @@ __author__ = 'kk'
 
 import websocket
 import time
-import printer
+# import printer
+from EDGE import printer
 import configparser
 import re
 import logger
 import json
 import monitor
 
-__version__ = '210823-2'
+__version__ = '210824-1'
 __config_version__ = '210819'
 __chrome_version__ = '92.0.4515.159'
 
