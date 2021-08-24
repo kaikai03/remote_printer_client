@@ -10,7 +10,7 @@ import logger
 import json
 import monitor
 
-__version__ = '210823'
+__version__ = '210823-2'
 __config_version__ = '210819'
 __chrome_version__ = '92.0.4515.159'
 
@@ -33,6 +33,8 @@ __print_info_report_base__ = (__return_flag__ + 'infoOrder_{"report":%s}')
 __pong_base__ = __return_flag__ + 'Pong_%s'
 
 __ban_flag__ = 'fuckoff#//'
+
+__login_error_flag__ = 'return#//loginError_'
 
 
 __ini_example__ = """************************************
@@ -141,6 +143,20 @@ def on_message(ws, msg):
         print(flag_clean(msg))
         banned = True
 
+    if __login_error_flag__ in msg:
+        # 防止休眠唤醒时，错误的判断重复登录,如果想要客户端下线，需要服务端调用ban方法
+        print('login error:', flag_clean(msg))
+        time.sleep(3)
+        global reconnect_count
+        reconnect_count += 1
+        print('登录错误，尝试第%d次重新登录' % reconnect_count)
+        if reconnect_count < 500:
+            if reconnect_count < 5:
+                time.sleep(2)
+            else:
+                time.sleep(10)
+        ws_connection(server_host)
+
     if __info_flag__ in msg:
         order = flag_clean(msg)
         if order == __info_pc__:
@@ -150,18 +166,23 @@ def on_message(ws, msg):
         else:
             print('unknown order:', order)
 
+
+
 def on_error(ws, error):
     print(error)
     print(type(error))
     global reconnect_count
 
-    try:
-       ws_error_flag = ws._exceptions.WebSocketConnectionClosedException
-    except Exception :
-        ws_error_flag = None
+    # try:
+    #    ws_error_flag = websocket._exceptions.WebSocketConnectionClosedException
+    #    # websocket._exceptions.WebSocketConnectionClosedException
+    # except Exception :
+    #     ws_error_flag = None
+    #
+    # print("fla:", ws_error_flag)
 
     if type(error) == ConnectionRefusedError or \
-            type(error) == ws_error_flag or \
+            type(error) == websocket._exceptions.WebSocketConnectionClosedException or \
             type(error) == ConnectionResetError or \
             type(error) == TimeoutError or \
             type(error) == ConnectionAbortedError or \
