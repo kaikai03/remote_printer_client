@@ -1,26 +1,25 @@
-# -*- coding:utf-8 -*-
-__author__ = 'kk'
 
-from selenium import webdriver
+from EDGE import web
 import time
 import os.path
 import requests
 
+driver_path = r"./printerDriver.exe"
+options = web.EDGEOptions()
+options.add_argument('--headless')
+options.add_argument('--disable-gpu')
+options.add_argument('--ignore-certificate-errors')
 
 def printer_check():
     try:
-        driver_path = r"./driver.exe"
-        options = webdriver.ChromeOptions()
-        options.add_argument('--headless')
-        options.add_argument('--disable-gpu')
-        driver = webdriver.Chrome(driver_path, options=options)
+        driver = web.EDGE(driver_path, options=options)
         driver.maximize_window()
         driver.set_page_load_timeout(10)
         driver.set_script_timeout(10)
         driver.implicitly_wait(10)
         driver.quit()
     except Exception as e:
-        print("驱动检查失败，考虑chrome浏览器未安装，或当前文件夹内驱动程序（driver.exe）丢失")
+        print("驱动检查失败，考虑chrome浏览器未安装，或当前文件夹内驱动程序（printerDriver.exe）丢失")
         print(e)
         return False
     return True
@@ -39,12 +38,7 @@ def print_report(report_addr):
     print("打印进程%d已启动" % os.getpid())
 
     retry_count = 0
-
-    driver_path = r"./driver.exe"
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    driver = webdriver.Chrome(driver_path, options=options)
+    driver = web.EDGE(driver_path, options=options)
     driver.maximize_window()
 
     driver.set_page_load_timeout(10)
@@ -72,14 +66,14 @@ def print_report(report_addr):
 
     while driver.execute_script("return document.getElementById('completeTwo')?false:true"):
         print('wait completeTwo')
-        time.sleep(0.5)
+        time.sleep(1)
         retry_count += 1
         if retry_count > 150:
             print('打印iframe加载超时')
             driver.quit()
             return -3
 
-    time.sleep(3)
+    time.sleep(1)
     driver.quit()
     print('打印完成')
     return 1
@@ -87,5 +81,5 @@ def print_report(report_addr):
 
 if __name__ == '__main__':
     print_report(
-        'https://test.drims1.cn/view/preciousBaby/scale/rd_print.jsp?&tableName=rd_scale_physical&tableDesc=体格生长&itemId=309&detailId=4313&printReporter=吕&printReporterId=3&printSign=8b3de1aa14e8453284f96b8333e01c9c&sendId=2119&visNo=A368&isprint=undefined&growPrint=true')
+        'https://test.drims.cn/view/preciousBaby/scale/rd_print.jsp?&tableName=rd_scale_physical&tableDesc=体格生长&itemId=309&detailId=4313&printReporter=吕&printReporterId=3&printSign=8b3de1aa14e8453284f96b8333e01c9c&sendId=2119&visNo=A368&isprint=undefined&growPrint=true')
 

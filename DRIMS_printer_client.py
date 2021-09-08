@@ -3,7 +3,6 @@ __author__ = 'kk'
 
 import websocket
 import time
-# import printer
 from EDGE import printer
 import configparser
 import re
@@ -11,7 +10,7 @@ import logger
 import json
 import monitor
 
-__version__ = '210824-1'
+__version__ = '210827-1'
 __config_version__ = '210819'
 __chrome_version__ = '92.0.4515.159'
 
@@ -168,19 +167,10 @@ def on_message(ws, msg):
             print('unknown order:', order)
 
 
-
 def on_error(ws, error):
     print(error)
     print(type(error))
     global reconnect_count
-
-    # try:
-    #    ws_error_flag = websocket._exceptions.WebSocketConnectionClosedException
-    #    # websocket._exceptions.WebSocketConnectionClosedException
-    # except Exception :
-    #     ws_error_flag = None
-    #
-    # print("fla:", ws_error_flag)
 
     if type(error) == ConnectionRefusedError or \
             type(error) == websocket._exceptions.WebSocketConnectionClosedException or \
@@ -199,7 +189,12 @@ def on_error(ws, error):
             ws_connection(server_host)
 
     else:
-        print('其他error!，中止服务')
+        print('其他error!，')
+        print('正在尝试未知错误重连' % reconnect_count)
+        reconnect_count += 1
+        if reconnect_count < 10:
+            time.sleep(60)
+            ws_connection(server_host)
 
 
 def on_close(ws, code, msg):
@@ -214,7 +209,7 @@ def on_open(ws):
 
 def load_configur():
     cf = configparser.ConfigParser()
-    cf.read("./config.ini",encoding='utf-8')
+    cf.read("./config.ini", encoding='utf-8')
     secs = cf.sections()
 
     if len(secs) == 0:
@@ -241,15 +236,15 @@ def load_configur():
 
 
 if __name__ == "__main__":
+    print('本体版本：', __version__)
+    print('配置版本：', __config_version__)
+    print('chrome最优版本：', __chrome_version__)
+
     logger.start_log()
     if not printer.printer_check():
         raise Exception('启动失败')
 
     load_configur()
-
-    print('本体版本：', __version__)
-    print('配置版本：', __config_version__)
-    print('chrome最优版本：', __chrome_version__)
 
     ws_connection(server_host)
 
